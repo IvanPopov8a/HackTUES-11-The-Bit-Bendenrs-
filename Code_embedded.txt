@@ -1,0 +1,23 @@
+const int tiltPin = 2;       
+const int buzzerPin = 6;     
+
+void setup() {
+  pinMode(tiltPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+
+  Serial.begin(9600);
+  Serial.println("Posture Monitor (Tilt Sensor Version)");
+}
+
+void loop() {
+  int tiltState = digitalRead(tiltPin);
+  if (tiltState == LOW) {
+    Serial.println("Slouch Detected! Vibrating...");
+    digitalWrite(buzzerPin, HIGH);
+  } else {
+    Serial.println("Good Posture");
+    digitalWrite(buzzerPin, LOW);
+  }
+
+  delay(300);
+}
