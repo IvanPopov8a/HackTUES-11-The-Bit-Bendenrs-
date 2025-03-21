@@ -15,10 +15,29 @@ int angle(int16_t &gyroX, int16_t &gyroY, int16_t &gyroZ) {  // Pass by referenc
     float angleY = gyroY * 0.00875;
     float angleZ = gyroZ * 0.00875;
 
-    if (angleX > 30) {
-        return 1;
+    for(int i=1;i<=10;i++)
+    {
+      delay(1000);
+      mywire.beginTransmission(K2230_ADDR);
+      mywire.write(0x28 | 0x80);
+      mywire.endTransmission();
+      mywire.requestFrom(K2230_ADDR, 6);
+      if (mywire.available() == 6) 
+      {
+        gyroX = mywire.read() | (mywire.read() << 8);
+        gyroY = mywire.read() | (mywire.read() << 8);
+        gyroZ = mywire.read() | (mywire.read() << 8);
+      }
+
+      float angleX = gyroX * 0.00875;
+      float angleY = gyroY * 0.00875;
+      float angleZ = gyroZ * 0.00875;
+        if (angleX <30) 
+          {
+            return 0;
+          }
     }
-    return 0;
+    return 1;
 }
 
 void setup() {
@@ -44,10 +63,10 @@ void loop() {
     Serial.print(" | Y: "); Serial.print(angleY);
     Serial.print(" | Z: "); Serial.println(angleZ);*/
 
-    while (angle(gyroX, gyroY, gyroZ) == 1) {
+    while (angle(gyroX, gyroY, gyroZ) == 0) {
         tone(Buzzer, 300);
         delay(500);
-        angle(gyroX, gyroY, gyroZ);  // This call seems redundant, but doesn't affect logic
+        angle(gyroX, gyroY, gyroZ); 
     }
     noTone(Buzzer);
 }
