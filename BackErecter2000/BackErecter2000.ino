@@ -3,7 +3,8 @@
 #define K2230_ADDR 0x68
 SoftWire mywire(2, 3); // Ensure to use the same variable name as defined above
 int Buzzer = 12;
-
+int touch_pin=5;
+int state;
 int angle(int16_t &gyroX, int16_t &gyroY, int16_t &gyroZ) {  // Pass by reference
     if (mywire.available() == 6) {  // Use 'mywire', not 'myWire'
         gyroX = mywire.read() | (mywire.read() << 8);
@@ -41,6 +42,7 @@ int angle(int16_t &gyroX, int16_t &gyroY, int16_t &gyroZ) {  // Pass by referenc
 }
 
 void setup() {
+    pinMode(touch_pin, INPUT);
     mywire.begin();  // Correct the usage to 'mywire'
     mywire.beginTransmission(K2230_ADDR);
     mywire.write(0x20);
@@ -52,21 +54,17 @@ void setup() {
 
 void loop() {
     int16_t gyroX, gyroY, gyroZ;
-
-    mywire.beginTransmission(K2230_ADDR);
-    mywire.write(0x28 | 0x80);
-    mywire.endTransmission();
-    mywire.requestFrom(K2230_ADDR, 6);
-
-    // This part was commented out in your original code
-    /*Serial.print("X: "); Serial.print(angleX);
-    Serial.print(" | Y: "); Serial.print(angleY);
-    Serial.print(" | Z: "); Serial.println(angleZ);*/
-
-    while (angle(gyroX, gyroY, gyroZ) == 0) {
-        tone(Buzzer, 300);
-        delay(500);
-        angle(gyroX, gyroY, gyroZ); 
+    state=digitalRead(touch_pin);
+    if(state==HIGH){
+      mywire.beginTransmission(K2230_ADDR);
+      mywire.write(0x28 | 0x80);
+      mywire.endTransmission();
+      mywire.requestFrom(K2230_ADDR, 6);
+      while (angle(gyroX, gyroY, gyroZ) == 0) {
+          tone(Buzzer, 300);
+          delay(500);
+          angle(gyroX, gyroY, gyroZ); 
+      }
+      noTone(Buzzer);
     }
-    noTone(Buzzer);
 }
